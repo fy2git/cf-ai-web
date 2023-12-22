@@ -7,5 +7,10 @@ export default defineNuxtConfig({
         '/': {
             prerender: true,
         }
+    },
+    app: {
+        head: {
+            title: 'Uni AI Web',
+        }
     }
 })
