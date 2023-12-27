@@ -22,22 +22,31 @@ export default defineEventHandler(async (event) => {
         })
         result = await chat.sendMessageStream(msg)
     } else if (model === 'gemini-pro-vision') {
-        const formData = await readFormData(event)
-        const prompt = formData.get('prompt') as string
-        const images = formData.getAll('images') as File[]
+        const multipartFormData = await readMultipartFormData(event)
 
+        let prompt
         const imageParts: VisionReq[] = []
-        for (const image of images) {
-            imageParts.push({
-                inlineData: {
-                    data: Buffer.from(await image.arrayBuffer()).toString('base64'),
-                    mimeType: image.type
-                }
-            })
-        }
+        multipartFormData?.map(d => {
+            switch (d.name) {
+                case 'prompt':
+                    prompt = d.data.toString()
+                    break;
+
+                case 'images':
+                    imageParts.push({
+                        inlineData: {
+                            data: d.data.toString('base64'),
+                            mimeType: d.type!
+                        }
+                    })
+                    break;
+            }
+        })
 
         const m = genAI.getGenerativeModel({model});
-        result = await m.generateContentStream([prompt, ...imageParts])
+        if (prompt) {
+            result = await m.generateContentStream([prompt, ...imageParts])
+        }
     }
 
     const encoder = new TextEncoder();
