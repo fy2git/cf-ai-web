@@ -1,4 +1,5 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+
 export default defineNuxtConfig({
     devtools: {enabled: false},
     modules: ['@nuxt/ui', '@nuxtjs/i18n'],
@@ -23,7 +24,26 @@ export default defineNuxtConfig({
                     name: 'description',
                     content: 'Integrated web platform supporting GeminiPro/Cloudflare Workers AI/ChatGPT by Jazee6'
                 }
+            ],
+            link: [
+                {
+                    rel: 'manifest',
+                    href: '/manifest.json'
+                }
             ]
+        }
+    },
+    vite: {
+        build: {
+            rollupOptions: {
+                output: {
+                    manualChunks: (id) => {
+                        if (id.includes('node_modules')) {
+                            return 'vendor'
+                        }
+                    }
+                }
+            }
         }
     },
     i18n: {
